@@ -2,7 +2,9 @@ import {createContext, useMemo, ReactNode, useState, useEffect, useCallback} fro
 
 // Emulate messages fetching
 
-const messages: Record<string, string> = {
+type TranslatedStrings = Record<string, string>;
+
+const messages: TranslatedStrings = {
     'Loading.First': 'Виджет грузится',
     'Loading.Second': 'Виджет ещё грузится',
     'Loading.Third': 'Загрузка идёт дольше чем обычно. Пожалуйста, подождите',
@@ -10,7 +12,7 @@ const messages: Record<string, string> = {
     'Success.LoadingFinished': 'Виджет загружен!',
 };
 
-const fetchMessages = () => messages;
+const fetchMessages: () => Promise<TranslatedStrings> = () => new Promise((resolve => resolve(messages)));
 
 // Context for translates
 
@@ -19,7 +21,7 @@ interface ITranslationProviderProps {
 }
 
 interface ITranslationState {
-    loadingMessages: Record<string, string>
+    loadingMessages: TranslatedStrings,
 }
 
 export interface ITranslationContext {
@@ -37,12 +39,17 @@ export function TranslationProvider(props: ITranslationProviderProps) {
     const [translates, setTranslates] = useState<ITranslationState>(initialState);
 
     useEffect(() => {
-        const loadingMessages = fetchMessages();
-        setTranslates({
-            ...translates,
-            loadingMessages,
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const fetchMessagesData = async () => {
+            const loadingMessages = await fetchMessages();
+
+            setTranslates({
+                ...translates,
+                loadingMessages,
+            });
+        };
+
+        fetchMessagesData()
+            .catch(console.error);
     }, []);
 
     const getTranslateByKey = useCallback(
