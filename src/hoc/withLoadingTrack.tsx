@@ -4,15 +4,15 @@ import {Loader, Box} from 'components';
 import {LoadingMessagesEnum} from 'enum';
 
 interface IWithLoadingTrackConfig {
-    maxLoadingTimeInSeconds: number,
+    loadingStepsChangeDelay: number,
 }
 
-const INITIAL_LOADING_SECONDS_VALUE = 1;
-const CHANGING_LOADING_STEPS_DELAY = 2000;
+const MAX_LOADING_STEP_VALUE = 3;
+const INITIAL_LOADING_STEP_VALUE = 1;
 const TIMEOUT_BEFORE_RENDERING_COMPONENT = 1000;
 
 const withLoadingTrack = (config: IWithLoadingTrackConfig) => (Component: FC<any>) => (props: any) => {
-    const [loadingSecondsCount, setLoadingSecondsCount] = useState(INITIAL_LOADING_SECONDS_VALUE);
+    const [loadingStepValue, setLoadingStepValue] = useState(INITIAL_LOADING_STEP_VALUE);
     const [isComponentVisible, setIsComponentVisible] = useState(false);
 
     const {isLoading, delayValue} = useManualDelay();
@@ -25,18 +25,18 @@ const withLoadingTrack = (config: IWithLoadingTrackConfig) => (Component: FC<any
     );
 
     const isWaitingTimeExceeded = useMemo(
-        () => loadingSecondsCount > config.maxLoadingTimeInSeconds,
-        [loadingSecondsCount],
+        () => loadingStepValue > MAX_LOADING_STEP_VALUE,
+        [loadingStepValue],
     );
     const maximumLoadingTimeInSeconds = useMemo(
-        () => config.maxLoadingTimeInSeconds * (CHANGING_LOADING_STEPS_DELAY / 1000),
+        () => MAX_LOADING_STEP_VALUE * (config.loadingStepsChangeDelay / 1000),
         [],
     );
 
     // Sum up loading seconds value, while waiting time is not exceeded
     useInterval(
-        () => setLoadingSecondsCount((prev) => prev + 1),
-        (isLoading && !isWaitingTimeExceeded) ? CHANGING_LOADING_STEPS_DELAY : null,
+        () => setLoadingStepValue((prev) => prev + 1),
+        (isLoading && !isWaitingTimeExceeded) ? config.loadingStepsChangeDelay : null,
     );
 
     // Set interval to show success message before Component rendering
@@ -64,7 +64,7 @@ const withLoadingTrack = (config: IWithLoadingTrackConfig) => (Component: FC<any
 
     // Show loading message
     if (isLoading) {
-        const loadingMessageCode = LoadingMessagesEnum.getLoadingMessageCode(loadingSecondsCount);
+        const loadingMessageCode = LoadingMessagesEnum.getLoadingMessageCode(loadingStepValue);
         return (
             <Box>
                 <p>

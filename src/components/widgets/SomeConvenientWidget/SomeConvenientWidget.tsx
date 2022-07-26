@@ -3,7 +3,7 @@ import {withLoadingTrack} from 'hoc';
 
 import './SomeConvenientWidget.css';
 
-const MAX_WIDGET_LOADING_TIME = 3;
+const LOADING_STEPS_CHANGE_DELAY = 2000;
 
 const SomeConvenientWidget:FC<any> = () => (
     <div className='SomeConvenientWidget'>
@@ -12,4 +12,4 @@ const SomeConvenientWidget:FC<any> = () => (
 );
 
 // Use HOC to add loading track for widget component
-export default withLoadingTrack({maxLoadingTimeInSeconds: MAX_WIDGET_LOADING_TIME})(SomeConvenientWidget);
+export default withLoadingTrack({loadingStepsChangeDelay: LOADING_STEPS_CHANGE_DELAY})(SomeConvenientWidget);
